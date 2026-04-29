@@ -1,117 +1,173 @@
+import { useEffect, useState } from "react";
 import Layout from "../../components/layout/Layout";
-import { FileText, Plus, Search } from "lucide-react";
+import { useProjectsStore } from "../../store/projectsStore";
+import { Trash } from "lucide-react";
 import "./projects-page.css";
+import Modal from "../../components/modal/Modal";
+import ProjectsSidebar from "../../components/projectsSidebar/ProjectsSidebar";
+import ProjectTree from "../../components/projectTree/ProjectTree";
+import Breadcrumb from "../../components/breadcrumb/Breadcrumb";
+import ProjectsContent from "../../components/projectsContent/ProjectsContent";
 
-const noteGroups = [
-  "Clippings",
-  "Daily",
-  "Ideas",
-  "Meta",
-  "Projects",
-  "References",
-];
+export type ModalType = "workspace" | "folder" | "note" | "delete" | null;
 
-const notes = [
-  "Evergreen notes turn ideas into objects",
-  "Calmness is a superpower",
-  "Travel",
-  "Creativity is combinatory uniqueness",
-  "Emergence",
-  "Recipes",
-  "Books",
-  "Health",
-];
+export type DeleteTarget =
+  | { kind: "workspace"; id: string; name: string }
+  | { kind: "folder"; id: string; name: string }
+  | { kind: "note"; id: string; name: string };
+
+export type ModalState =
+  | { type: "workspace" }
+  | { type: "folder"; parentId: string | null }
+  | { type: "note"; parentId: string | null }
+  | { type: "delete"; target: DeleteTarget }
+  | null;
 
 export default function ProjectsPage() {
+  const {
+    workspaces,
+    getWorkspaces,
+    openWorkspace,
+    selectedWorkspaceId,
+    error,
+  } = useProjectsStore();
+  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(
+    new Set(),
+  );
+  const [modal, setModal] = useState<ModalState>(null);
+
+  const selectedWorkspace =
+    workspaces.find((item) => item.id === selectedWorkspaceId) ?? null;
+  useEffect(() => {
+    getWorkspaces().catch(() => undefined);
+  }, [getWorkspaces]);
+
+  const openModal = (
+    type: "workspace" | "folder" | "note",
+    parentId: string | null = null,
+  ) => {
+    if (type === "workspace") {
+      setModal({ type: "workspace" });
+      return;
+    }
+
+    setModal({
+      type,
+      parentId,
+    });
+  };
+
+  const openDeleteModal = (target: DeleteTarget) => {
+    setModal({
+      type: "delete",
+      target,
+    });
+  };
+
+  const closeModal = () => {
+    setModal(null);
+  };
+
+  const toggleFolder = (folderId: string) => {
+    setExpandedFolders((current) => {
+      const next = new Set(current);
+      if (next.has(folderId)) {
+        next.delete(folderId);
+      } else {
+        next.add(folderId);
+      }
+      return next;
+    });
+  };
+
   return (
     <Layout>
       <div className="projects-layout">
         <aside className="projects-sidebar">
           <section className="projects-sidebar__panel">
-            <div className="projects-sidebar__actions">
-              <button className="projects-action-btn" aria-label="Open note">
-                <FileText size={16} />
-              </button>
-              <button className="projects-action-btn" aria-label="Create note">
-                <Plus size={16} />
-              </button>
-              <button className="projects-action-btn" aria-label="Search">
-                <Search size={16} />
-              </button>
+            <ProjectsSidebar
+              openModal={openModal}
+              selectedWorkspaceId={selectedWorkspaceId}
+            />
+
+            <div className="projects-sidebar__header">
+              <h2 className="projects-sidebar__heading">Projects</h2>
+              <span>{workspaces.length}</span>
             </div>
 
-            <h2 className="projects-sidebar__heading">Notes</h2>
-
-            <nav className="projects-groups" aria-label="Folders">
-              {noteGroups.map((group) => (
-                <button key={group} className="projects-groups__item">
-                  <span className="projects-groups__chevron">{">"}</span>
-                  {group}
+            <nav className="workspaces-nav" aria-label="Workspaces">
+              {workspaces.map((workspace) => (
+                <button
+                  key={workspace.id}
+                  type="button"
+                  className={
+                    workspace.id === selectedWorkspaceId
+                      ? "workspaces-nav__item workspaces-nav__item--active"
+                      : "workspaces-nav__item"
+                  }
+                  onClick={() => {
+                    setExpandedFolders(new Set());
+                    openWorkspace(workspace.id);
+                  }}
+                >
+                  <span className="workspaces-nav__icon">
+                    {workspace.icon || "W"}
+                  </span>
+                  <span>
+                    <strong>{workspace.name}</strong>
+                    {workspace.description && (
+                      <small>{workspace.description}</small>
+                    )}
+                  </span>
+                  <span className="workspaces-nav__icon">
+                    <Trash
+                      size={16}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        openDeleteModal({
+                          kind: "workspace",
+                          id: workspace.id,
+                          name: workspace.name,
+                        });
+                      }}
+                    />
+                  </span>
                 </button>
               ))}
             </nav>
-
             <div className="projects-sidebar__divider" />
-
-            <ul className="projects-notes">
-              {notes.map((note, index) => (
-                <li
-                  key={note}
-                  className={
-                    index === 1
-                      ? "projects-notes__item projects-notes__item--active"
-                      : "projects-notes__item"
-                  }
-                >
-                  {note}
-                </li>
-              ))}
-            </ul>
+            {selectedWorkspace ? (
+              <ProjectTree
+                selectedWorkspace={selectedWorkspace}
+                expandedFolders={expandedFolders}
+                openModal={openModal}
+                openDeleteModal={openDeleteModal}
+                onToggleFolder={toggleFolder}
+              />
+            ) : (
+              <p className="project-tree__empty">
+                Create a workspace to start.
+              </p>
+            )}
           </section>
         </aside>
 
         <main className="projects-main">
-          <header className="projects-main__breadcrumbs">
-            <span>Ideas</span>
-            <span className="projects-main__separator">/</span>
-            <span className="projects-main__current">Writing is telepathy</span>
-          </header>
+          <Breadcrumb />
 
-          <section className="projects-main__content">
-            <article className="note">
-              <h1 className="note__title">Writing is telepathy</h1>
+          {error && <div className="projects-alert">{error}</div>}
 
-              <div className="note__meta">
-                <span className="note__tag">#evergreen</span>
-                <span className="note__source">From On Writing</span>
-              </div>
-
-              <h2 className="note__subtitle">
-                Ideas can travel through time and space
-              </h2>
-
-              <p>
-                Ideas can travel through time and space without being uttered
-                out loud. The process of telepathy requires two places: a
-                sending place and a receiving place.
-              </p>
-
-              <ul>
-                <li>
-                  A sending place where writer shapes thought into language.
-                </li>
-                <li>
-                  A receiving place where the reader reconstructs that idea.
-                </li>
-              </ul>
-
-              <blockquote className="note__quote">
-                The most powerful notes are simple, linked, and revisitable.
-              </blockquote>
-            </article>
-          </section>
+          <ProjectsContent openModal={openModal} />
         </main>
       </div>
+
+      {modal && (
+        <Modal
+          modal={modal}
+          closeModal={closeModal}
+          setExpandedFolders={setExpandedFolders}
+        />
+      )}
     </Layout>
   );
 }

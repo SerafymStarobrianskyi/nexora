@@ -56,4 +56,28 @@ const getWorksapceNotes = async (req, res) => {
   }
 };
 
-module.exports = { createNote, getWorksapceNotes };
+const deleteNote = async (req, res) => {
+  try {
+    const { noteId } = req.params;
+
+    const result = await pool.query(
+      "DELETE FROM notes WHERE id = $1 RETURNING *",
+      [noteId],
+    );
+    const note = result.rows[0];
+    if (!note) {
+      return res.status(404).json({
+        message: "Note not found",
+      });
+    }
+    res.json({
+        message:"Note deleted",
+        note
+    })
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+module.exports = { createNote, getWorksapceNotes, deleteNote };
