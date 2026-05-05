@@ -1,8 +1,4 @@
-import {
-  FolderClosed,
-  Home,
-  Settings,
-} from "lucide-react";
+import { FolderClosed, Home, Settings } from "lucide-react";
 import "./layout.css";
 import { Link } from "react-router-dom";
 
@@ -15,7 +11,6 @@ const railMenu = [
   { icon: FolderClosed, label: "Projects", link: "/projects" },
   { icon: Settings, label: "Settings", link: "/settings" },
 ];
-
 
 export default function Layout({ children }: LayoutProps) {
   return (

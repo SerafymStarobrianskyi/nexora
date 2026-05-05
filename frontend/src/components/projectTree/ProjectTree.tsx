@@ -24,13 +24,8 @@ export default function ProjectTree({
   openDeleteModal,
   onToggleFolder,
 }: ProjectTreeProps) {
-  const {
-    selectedFolderId,
-    selectedNoteId,
-    isLoading,
-    openFolder,
-    openNote,
-  } = useProjectsStore();
+  const { selectedFolderId, selectedNoteId, isLoading, openFolder, openNote } =
+    useProjectsStore();
 
   const { folders, notes } = useSelectedProjectData();
   const rootFolders = useMemo(

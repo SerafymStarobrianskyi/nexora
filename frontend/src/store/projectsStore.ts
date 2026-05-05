@@ -9,6 +9,7 @@ import {
   getWorkspaceFolders,
   getWorkspaceNotes,
   getWorkspaces,
+  updateNote,
   type AddFolderPayload,
   type AddNotePayload,
   type AddWorkspacePayload,
@@ -38,6 +39,7 @@ type ProjectsStore = {
   createNote: (payload: AddNotePayload) => Promise<Note>;
   deleteFolder: (folderId: string) => Promise<void>;
   deleteNote: (noteId: string) => Promise<void>;
+  updateNoteContent: (noteId: string, content: string) => Promise<Note>;
 };
 
 export const useProjectsStore = create<ProjectsStore>((set, get) => ({
@@ -325,6 +327,39 @@ export const useProjectsStore = create<ProjectsStore>((set, get) => ({
         error: error instanceof Error ? error.message : "Failed to delete note",
       });
 
+      throw error;
+    } finally {
+      set({ isSaving: false });
+    }
+  },
+
+  updateNoteContent: async (noteId, content) => {
+    set({ isSaving: true, error: null });
+
+    try {
+      const state = get();
+      const workspaceId = state.selectedWorkspaceId;
+
+      if (!workspaceId) {
+        throw new Error("Workspace is not selected");
+      }
+
+      const data = await updateNote(noteId, { content });
+
+      set((state) => ({
+        notesByWorkspace: {
+          ...state.notesByWorkspace,
+          [workspaceId]: (state.notesByWorkspace[workspaceId] ?? []).map(
+            (note) => (note.id === noteId ? data.note : note),
+          ),
+        },
+      }));
+
+      return data.note;
+    } catch (error) {
+      set({
+        error: error instanceof Error ? error.message : "Error to update note",
+      });
       throw error;
     } finally {
       set({ isSaving: false });

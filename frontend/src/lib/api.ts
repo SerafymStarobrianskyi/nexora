@@ -1,10 +1,10 @@
 import { getToken, removeToken } from "./auth-token";
 
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 export async function apiFetch<T>(
   endpoint: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
 ): Promise<T> {
   const token = getToken();
 
@@ -18,8 +18,8 @@ export async function apiFetch<T>(
   });
 
   const data = await res.json();
-  
-  if(res.status===401){
+
+  if (res.status === 401) {
     removeToken();
     window.location.href = "/login";
   }

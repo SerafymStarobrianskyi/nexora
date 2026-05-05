@@ -59,7 +59,11 @@ export interface AddNotePayload {
   content: string;
 }
 
-export interface DeleteWorkspaceResponse{
+export interface UpdateNotePayload {
+  content: string;
+}
+
+export interface DeleteWorkspaceResponse {
   message: string;
   workspace: Workspace;
 }
@@ -71,7 +75,12 @@ export interface DeleteFolderResponse {
 
 export interface DeleteNoteResponse {
   message: string;
-  folder: Note;
+  note: Note;
+}
+
+export interface UpdateNoteResponse {
+  message: string;
+  note: Note;
 }
 
 export type GetWorkspacesResponse = Workspace[];
@@ -118,9 +127,9 @@ export function getWorkspaceNotes(workspaceId: string) {
 }
 
 export function deleteWorkspace(workspaceId: string) {
-  return apiFetch<DeleteWorkspaceResponse>(`/workspaces/${workspaceId}`,{
+  return apiFetch<DeleteWorkspaceResponse>(`/workspaces/${workspaceId}`, {
     method: "DELETE",
-  })
+  });
 }
 
 export function deleteFolder(folderId: string) {
@@ -132,5 +141,12 @@ export function deleteFolder(folderId: string) {
 export function deleteNote(noteId: string) {
   return apiFetch<DeleteNoteResponse>(`/notes/${noteId}`, {
     method: "DELETE",
+  });
+}
+
+export function updateNote(noteId: string, payload: UpdateNotePayload) {
+  return apiFetch<UpdateNoteResponse>(`/notes/${noteId}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
   });
 }

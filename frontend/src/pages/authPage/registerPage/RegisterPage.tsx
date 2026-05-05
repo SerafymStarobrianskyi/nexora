@@ -100,7 +100,11 @@ export default function RegisterPage() {
             />
           </label>
 
-          <button className="auth-page__submit" type="submit" disabled={loading}>
+          <button
+            className="auth-page__submit"
+            type="submit"
+            disabled={loading}
+          >
             {loading ? "Loading..." : "Create account"}
           </button>
 
