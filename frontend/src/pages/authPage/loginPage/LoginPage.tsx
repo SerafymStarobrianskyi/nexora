@@ -55,7 +55,11 @@ export default function LoginPage() {
             />
           </label>
 
-          <button className="auth-page__submit" type="submit" disabled={isLoading}>
+          <button
+            className="auth-page__submit"
+            type="submit"
+            disabled={isLoading}
+          >
             {isLoading ? "Loading..." : "Login"}
           </button>
 

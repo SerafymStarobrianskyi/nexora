@@ -1,10 +1,17 @@
-const express = require("express");
-const auth = require("../middlewares/auth");
-const { createNote, getWorksapceNotes,deleteNote } = require("../controllers/notes");
+import express from "express";
+import auth from "../middlewares/auth.js";
+import {
+  createNote,
+  getWorksapceNotes,
+  deleteNote,
+  updateNote,
+} from "../controllers/notes.js";
+
 const router = express.Router();
 
-router.post("/",auth, createNote);
-router.get("/:workspaceId",auth, getWorksapceNotes);
+router.post("/", auth, createNote);
+router.get("/:workspaceId", auth, getWorksapceNotes);
 router.delete("/:noteId", auth, deleteNote);
+router.patch("/:noteId", auth, updateNote);
 
-module.exports = router;
+export default router;

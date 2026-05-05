@@ -1,13 +1,14 @@
-const pool = require("../db");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
+import pool from "../db/index.js";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
-
-const registerUser = async (req, res) => {
+export const registerUser = async (req, res) => {
   const { full_name, email, password } = req.body;
 
   if (!full_name || !email || !password) {
-    return res.status(400).json({ message: "Email and password required" });
+    return res
+      .status(400)
+      .json({ message: "Full name, email and password required" });
   }
 
   const normalizedEmail = email.trim().toLowerCase();
@@ -30,15 +31,17 @@ const registerUser = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+
     const result = await pool.query(
       "INSERT INTO users (full_name, email, password_hash) VALUES ($1, $2, $3) RETURNING id, email, full_name",
       [trimmedName, normalizedEmail, hashedPassword],
     );
 
     const user = result.rows[0];
+
     res.status(201).json({
       message: "User created",
-      user: user,
+      user,
     });
   } catch (error) {
     console.error(error);
@@ -46,8 +49,7 @@ const registerUser = async (req, res) => {
   }
 };
 
-
-const loginUser = async (req, res) => {
+export const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -87,8 +89,7 @@ const loginUser = async (req, res) => {
   }
 };
 
-
-const checkProfile = async (req, res) => {
+export const checkProfile = async (req, res) => {
   try {
     const result = await pool.query(
       "SELECT id, full_name, email, created_at FROM users WHERE id = $1",
@@ -110,5 +111,3 @@ const checkProfile = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-
-module.exports = { registerUser, loginUser, checkProfile };

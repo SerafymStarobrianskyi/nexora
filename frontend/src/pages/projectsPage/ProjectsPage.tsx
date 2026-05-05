@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
 import Layout from "../../components/layout/Layout";
 import { useProjectsStore } from "../../store/projectsStore";
-import { Trash } from "lucide-react";
+import { Share2, Trash } from "lucide-react";
 import "./projects-page.css";
 import Modal from "../../components/modal/Modal";
 import ProjectsSidebar from "../../components/projectsSidebar/ProjectsSidebar";
 import ProjectTree from "../../components/projectTree/ProjectTree";
 import Breadcrumb from "../../components/breadcrumb/Breadcrumb";
 import ProjectsContent from "../../components/projectsContent/ProjectsContent";
+import { useSelectedProjectData } from "../../store/projectsSelector";
+import WorkspaceGraph from "../../components/workspaceGraph/WorkspaceGraph";
 
 export type ModalType = "workspace" | "folder" | "note" | "delete" | null;
 
@@ -35,7 +37,8 @@ export default function ProjectsPage() {
     new Set(),
   );
   const [modal, setModal] = useState<ModalState>(null);
-
+  const [isGraphOpen, setIsGraphOpen] = useState(false);
+  const { folders, notes } = useSelectedProjectData();
   const selectedWorkspace =
     workspaces.find((item) => item.id === selectedWorkspaceId) ?? null;
   useEffect(() => {
@@ -153,11 +156,48 @@ export default function ProjectsPage() {
         </aside>
 
         <main className="projects-main">
-          <Breadcrumb />
+          <div className="projects-main__topbar">
+            <Breadcrumb />
+            <button
+              type="button"
+              className={
+                isGraphOpen
+                  ? "projects-main__graph-btn projects-main__graph-btn--active"
+                  : "projects-main__graph-btn"
+              }
+              disabled={!selectedWorkspace}
+              onClick={() => setIsGraphOpen((current) => !current)}
+              aria-pressed={isGraphOpen}
+              title={isGraphOpen ? "Hide graph" : "Open graph"}
+            >
+              <Share2 size={15} />
+              Graph
+            </button>
+          </div>
 
           {error && <div className="projects-alert">{error}</div>}
 
-          <ProjectsContent openModal={openModal} />
+          <div
+            className={
+              isGraphOpen && selectedWorkspace
+                ? "projects-main__workspace projects-main__workspace--split"
+                : "projects-main__workspace"
+            }
+          >
+            <div className="projects-main__workspace-content">
+              <ProjectsContent openModal={openModal} />
+            </div>
+
+            {isGraphOpen && selectedWorkspace && (
+              <aside className="projects-main__graph-panel">
+                <WorkspaceGraph
+                  workspace={selectedWorkspace}
+                  folders={folders}
+                  notes={notes}
+                />
+              </aside>
+            )}
+          </div>
         </main>
       </div>
 

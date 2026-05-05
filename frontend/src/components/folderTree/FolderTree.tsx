@@ -72,7 +72,7 @@ export default function FolderTree({
           }
         >
           <span className="project-tree__folder-dot" />
-          <Folder size={15}  style={{color: folderColor}}/>
+          <Folder size={15} style={{ color: folderColor }} />
           <span>{folder.name}</span>
         </button>
         <button

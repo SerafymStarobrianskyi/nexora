@@ -1,6 +1,6 @@
-const pool = require("../db");
+import pool from "../db/index.js";
 
-const createWorkspace = async (req, res) => {
+export const createWorkspace = async (req, res) => {
   const { name, icon, description } = req.body;
 
   if (!name) {
@@ -16,10 +16,12 @@ const createWorkspace = async (req, res) => {
       "INSERT INTO workspaces (owner_id, name, icon, description) VALUES ($1, $2, $3, $4) RETURNING *",
       [req.user.userId, name, icon || null, description || null],
     );
+
     const workspace = result.rows[0];
+
     res.status(201).json({
       message: "Workspace added",
-      workspace: workspace,
+      workspace,
     });
   } catch (error) {
     console.error(error);
@@ -27,21 +29,21 @@ const createWorkspace = async (req, res) => {
   }
 };
 
-const getMyWorkspaces = async (req, res) => {
+export const getMyWorkspaces = async (req, res) => {
   try {
     const result = await pool.query(
       "SELECT id, owner_id, name, icon, description FROM workspaces WHERE owner_id = $1 ORDER BY created_at DESC",
       [req.user.userId],
     );
-    const workspaces = result.rows;
-    res.status(200).json(workspaces);
+
+    res.status(200).json(result.rows);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
   }
 };
 
-const deleteWorkspace = async (req, res) => {
+export const deleteWorkspace = async (req, res) => {
   try {
     const { workspaceId } = req.params;
 
@@ -49,20 +51,21 @@ const deleteWorkspace = async (req, res) => {
       "DELETE FROM workspaces WHERE id = $1 RETURNING *",
       [workspaceId],
     );
+
     const workspace = result.rows[0];
+
     if (!workspace) {
       return res.status(404).json({
         message: "Workspace not found",
       });
     }
+
     res.json({
-        message:"Workspace deleted",
-        workspace
-    })
+      message: "Workspace deleted",
+      workspace,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
   }
 };
-
-module.exports = { createWorkspace, getMyWorkspaces, deleteWorkspace };

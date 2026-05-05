@@ -2,12 +2,18 @@ import { FilePlus2, FolderPlus, Plus, Search } from "lucide-react";
 import { useProjectsStore } from "../../store/projectsStore";
 
 type ProjectsSidebarProps = {
-  openModal: (type: "workspace" | "folder" | "note", parentId?: string | null) => void;
+  openModal: (
+    type: "workspace" | "folder" | "note",
+    parentId?: string | null,
+  ) => void;
   selectedWorkspaceId: string | null;
 };
 
-export default function ProjectsSidebar({openModal, selectedWorkspaceId}:ProjectsSidebarProps) {
-  const {selectedFolderId} = useProjectsStore();
+export default function ProjectsSidebar({
+  openModal,
+  selectedWorkspaceId,
+}: ProjectsSidebarProps) {
+  const { selectedFolderId } = useProjectsStore();
   return (
     <div className="projects-sidebar__actions">
       <button

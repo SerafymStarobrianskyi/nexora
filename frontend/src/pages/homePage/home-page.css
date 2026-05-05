@@ -1,69 +1,181 @@
 .home-page {
-  padding: 24px;
+  display: grid;
+  gap: 22px;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 32px;
 }
 
-.note {
+.home-hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 28px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.home-hero__copy {
   max-width: 760px;
 }
 
-.note__title {
-  margin: 0 0 16px;
-  font-size: clamp(1.9rem, 2.8vw, 2.6rem);
-  line-height: 1.15;
-  letter-spacing: -0.02em;
-}
-
-.note__meta {
-  display: flex;
+.home-kicker {
+  display: inline-flex;
   align-items: center;
+  gap: 7px;
+  margin-bottom: 10px;
+  color: #2f7d6d;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.home-hero h1,
+.home-panel h2,
+.home-card h2 {
+  margin: 0;
+  color: var(--text-primary);
+  line-height: 1.12;
+}
+
+.home-hero h1 {
+  max-width: 720px;
+  font-size: clamp(2.2rem, 5vw, 4.4rem);
+}
+
+.home-hero p {
+  max-width: 720px;
+  margin: 16px 0 0;
+  color: var(--text-secondary);
+  font-size: 1.08rem;
+  line-height: 1.65;
+}
+
+.home-hero__button {
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 0 14px;
+  color: #ffffff;
+  background: #22242a;
+  font-weight: 800;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.home-hero__button:hover {
+  background: #111217;
+}
+
+.home-grid {
+  display: grid;
   gap: 12px;
-  margin-bottom: 18px;
 }
 
-.note__tag {
-  padding: 4px 9px;
-  border-radius: 999px;
-  background: #ede9fe;
-  color: #5b3cc4;
-  font-size: 0.84rem;
-  font-weight: 600;
+.home-grid--steps {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
-.note__source {
+.home-card,
+.home-panel {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.home-card {
+  padding: 16px;
+}
+
+.home-card__icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 14px;
+  color: #4f46b7;
+  background: #ecebff;
+}
+
+.home-card h2 {
+  font-size: 1rem;
+}
+
+.home-card p {
+  margin: 9px 0 0;
   color: var(--text-secondary);
   font-size: 0.95rem;
-}
-
-.note__subtitle {
-  margin: 0 0 14px;
-  font-size: 1.8rem;
-  line-height: 1.2;
-}
-
-.note p {
-  margin: 0 0 12px;
-  color: var(--text-secondary);
-  font-size: 1.04rem;
-  line-height: 1.6;
-}
-
-.note ul {
-  margin: 0 0 18px 18px;
-  padding: 0;
-}
-
-.note li {
-  margin-bottom: 8px;
-  color: var(--text-secondary);
-  line-height: 1.5;
-}
-
-.note__quote {
-  margin: 0;
-  padding: 12px 16px;
-  border-left: 3px solid #8b85ff;
-  background: #f7f7fb;
-  color: #262634;
-  border-radius: 8px;
   line-height: 1.55;
+}
+
+.home-panel {
+  padding: 18px;
+}
+
+.home-panel__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 14px;
+}
+
+.home-panel h2 {
+  font-size: 1.45rem;
+}
+
+.home-markdown-list {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.home-markdown-row {
+  border-radius: 8px;
+  display: grid;
+  gap: 7px;
+  padding: 12px;
+  background: #f7f8fb;
+}
+
+.home-markdown-row code {
+  color: #22242a;
+  font-family: "Cascadia Code", "Consolas", monospace;
+  font-size: 0.9rem;
+}
+
+.home-markdown-row span {
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+@media (max-width: 1100px) {
+  .home-grid--steps,
+  .home-markdown-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .home-page {
+    padding: 22px;
+  }
+
+  .home-hero {
+    display: grid;
+  }
+
+  .home-hero__button {
+    width: 100%;
+  }
+
+  .home-grid--steps,
+  .home-markdown-list {
+    grid-template-columns: 1fr;
+  }
 }

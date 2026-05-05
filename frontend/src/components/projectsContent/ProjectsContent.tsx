@@ -1,5 +1,6 @@
 import { FilePlus2, FolderPlus } from "lucide-react";
 import { useSelectedProjectData } from "../../store/projectsSelector";
+import Note from "../note/Note";
 
 type ProjectsContentProps = {
   openModal: (
@@ -14,16 +15,7 @@ export default function ProjectsContent({ openModal }: ProjectsContentProps) {
   return (
     <section className="projects-main__content">
       {selectedNote ? (
-        <article className="note">
-          <div className="note__meta">
-            <span className="note__tag">file</span>
-            {selectedFolder && (
-              <span className="note__source">{selectedFolder.path}</span>
-            )}
-          </div>
-          <h1 className="note__title">{selectedNote.title}</h1>
-          <p>{selectedNote.content || "This file is empty."}</p>
-        </article>
+        <Note key={selectedNote.id} />
       ) : selectedFolder ? (
         <section className="folder-view">
           <div>

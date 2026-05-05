@@ -28,7 +28,9 @@
   color: var(--muted-text);
   background: transparent;
   text-decoration: none;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .app-rail__icon:hover {
