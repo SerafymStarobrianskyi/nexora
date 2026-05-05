@@ -91,11 +91,11 @@ export const useProjectsStore = create<ProjectsStore>((set, get) => ({
         (workspace) => workspace.id !== workspaceId,
       );
 
-      const { [workspaceId]: removedFolders, ...foldersByWorkspace } =
-        state.foldersByWorkspace;
+      const foldersByWorkspace = { ...state.foldersByWorkspace };
+      delete foldersByWorkspace[workspaceId];
 
-      const { [workspaceId]: removedNotes, ...notesByWorkspace } =
-        state.notesByWorkspace;
+      const notesByWorkspace = { ...state.notesByWorkspace };
+      delete notesByWorkspace[workspaceId];
 
       const wasSelected = state.selectedWorkspaceId === workspaceId;
       const nextWorkspaceId = wasSelected

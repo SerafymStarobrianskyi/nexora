@@ -48,8 +48,8 @@ export const deleteWorkspace = async (req, res) => {
     const { workspaceId } = req.params;
 
     const result = await pool.query(
-      "DELETE FROM workspaces WHERE id = $1 RETURNING *",
-      [workspaceId],
+      "DELETE FROM workspaces WHERE id = $1 AND owner_id = $2 RETURNING *",
+      [workspaceId, req.user.userId],
     );
 
     const workspace = result.rows[0];

@@ -51,6 +51,15 @@ async function syncNoteLinks(client, note) {
   }
 }
 
+async function userOwnsWorkspace(client, userId, workspaceId) {
+  const result = await client.query(
+    "SELECT id FROM workspaces WHERE id = $1 AND owner_id = $2 LIMIT 1",
+    [workspaceId, userId],
+  );
+
+  return Boolean(result.rows[0]);
+}
+
 export const createNote = async (req, res) => {
   const { workspace_id, folder_id, title, content } = req.body;
 
@@ -65,6 +74,29 @@ export const createNote = async (req, res) => {
 
   try {
     await client.query("BEGIN");
+
+    const ownsWorkspace = await userOwnsWorkspace(
+      client,
+      req.user.userId,
+      workspace_id,
+    );
+
+    if (!ownsWorkspace) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ message: "Workspace not found" });
+    }
+
+    if (folder_id) {
+      const folderResult = await client.query(
+        "SELECT id FROM folders WHERE id = $1 AND workspace_id = $2 LIMIT 1",
+        [folder_id, workspace_id],
+      );
+
+      if (!folderResult.rows[0]) {
+        await client.query("ROLLBACK");
+        return res.status(404).json({ message: "Folder not found" });
+      }
+    }
 
     const result = await client.query(
       "INSERT INTO notes (workspace_id, folder_id, author_id, title, slug, content) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
@@ -98,8 +130,8 @@ export const getWorksapceNotes = async (req, res) => {
     const { workspaceId } = req.params;
 
     const result = await pool.query(
-      "SELECT * FROM notes WHERE workspace_id = $1 AND deleted_at IS NULL ORDER BY updated_at DESC",
-      [workspaceId],
+      "SELECT notes.* FROM notes INNER JOIN workspaces ON notes.workspace_id = workspaces.id WHERE notes.workspace_id = $1 AND workspaces.owner_id = $2 AND notes.deleted_at IS NULL ORDER BY notes.updated_at DESC",
+      [workspaceId, req.user.userId],
     );
 
     res.json(result.rows);
@@ -114,8 +146,8 @@ export const deleteNote = async (req, res) => {
     const { noteId } = req.params;
 
     const result = await pool.query(
-      "DELETE FROM notes WHERE id = $1 RETURNING *",
-      [noteId],
+      "DELETE FROM notes USING workspaces WHERE notes.id = $1 AND notes.workspace_id = workspaces.id AND workspaces.owner_id = $2 RETURNING notes.*",
+      [noteId, req.user.userId],
     );
 
     const note = result.rows[0];
@@ -146,8 +178,8 @@ export const updateNote = async (req, res) => {
     const { content } = req.body;
 
     const result = await client.query(
-      "UPDATE notes SET content = COALESCE($1, content), updated_at = NOW() WHERE id = $2 RETURNING *",
-      [content, noteId],
+      "UPDATE notes SET content = COALESCE($1, notes.content), updated_at = NOW() FROM workspaces WHERE notes.id = $2 AND notes.workspace_id = workspaces.id AND workspaces.owner_id = $3 RETURNING notes.*",
+      [content, noteId, req.user.userId],
     );
 
     const note = result.rows[0];

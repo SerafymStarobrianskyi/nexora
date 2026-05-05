@@ -95,8 +95,17 @@ const MarkdownEditor = forwardRef<MarkdownEditorHandle, MarkdownEditorProps>(
   ({ value, onChange, onHistoryChange }, ref) => {
     const editorRef = useRef<HTMLDivElement | null>(null);
     const viewRef = useRef<EditorView | null>(null);
+    const valueRef = useRef(value);
+    const onChangeRef = useRef(onChange);
+    const onHistoryChangeRef = useRef(onHistoryChange);
     const { notes } = useSelectedProjectData();
     const { selectedNoteId } = useProjectsStore();
+
+    useEffect(() => {
+      valueRef.current = value;
+      onChangeRef.current = onChange;
+      onHistoryChangeRef.current = onHistoryChange;
+    }, [value, onChange, onHistoryChange]);
 
     useImperativeHandle(ref, () => ({
       undo() {
@@ -175,7 +184,7 @@ const MarkdownEditor = forwardRef<MarkdownEditorHandle, MarkdownEditorProps>(
       const view = new EditorView({
         parent: editorRef.current,
         state: EditorState.create({
-          doc: value,
+          doc: valueRef.current,
           extensions: [
             lineNumbers(),
             foldGutter(),
@@ -198,10 +207,10 @@ const MarkdownEditor = forwardRef<MarkdownEditorHandle, MarkdownEditorProps>(
             EditorView.lineWrapping,
             EditorView.updateListener.of((update) => {
               if (update.docChanged) {
-                onChange(update.state.doc.toString());
+                onChangeRef.current(update.state.doc.toString());
               }
 
-              onHistoryChange?.({
+              onHistoryChangeRef.current?.({
                 canUndo: undoDepth(update.state) > 0,
                 canRedo: redoDepth(update.state) > 0,
               });
@@ -219,7 +228,7 @@ const MarkdownEditor = forwardRef<MarkdownEditorHandle, MarkdownEditorProps>(
         }),
       });
 
-      onHistoryChange?.({
+      onHistoryChangeRef.current?.({
         canUndo: undoDepth(view.state) > 0,
         canRedo: redoDepth(view.state) > 0,
       });
@@ -230,7 +239,7 @@ const MarkdownEditor = forwardRef<MarkdownEditorHandle, MarkdownEditorProps>(
         view.destroy();
         viewRef.current = null;
       };
-    }, []);
+    }, [noteLinkCompletions]);
 
     return <div className="note__code-editor" ref={editorRef} />;
   },

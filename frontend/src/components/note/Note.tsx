@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useSelectedProjectData } from "../../store/projectsSelector";
 import { useProjectsStore } from "../../store/projectsStore";
 import { Columns2, Eye, PenLine, Redo2, Save, Undo2 } from "lucide-react";
@@ -6,30 +6,43 @@ import MarkdownEditor, {
   type MarkdownEditorHandle,
 } from "../markdownEditor/MarkdownEditor";
 import { renderMarkdown } from "./NotePreview";
+import type { Folder, Note as ProjectNote } from "../../api/projects";
 
 type NoteMode = "split" | "edit" | "preview";
 
 export default function Note() {
   const { selectedFolder, selectedNote, notes } = useSelectedProjectData();
+
+  if (!selectedNote) return null;
+
+  return (
+    <NoteEditor
+      key={selectedNote.id}
+      selectedFolder={selectedFolder}
+      selectedNote={selectedNote}
+      notes={notes}
+    />
+  );
+}
+
+type NoteEditorProps = {
+  selectedFolder: Folder | null;
+  selectedNote: ProjectNote;
+  notes: ProjectNote[];
+};
+
+function NoteEditor({ selectedFolder, selectedNote, notes }: NoteEditorProps) {
   const { isSaving, updateNoteContent, openNote } = useProjectsStore();
-  const [draft, setDraft] = useState(selectedNote?.content ?? "");
+  const selectedNoteContent = selectedNote.content;
+  const [draft, setDraft] = useState(selectedNoteContent);
   const [mode, setMode] = useState<NoteMode>(
-    selectedNote.content ? "preview" : "split",
+    selectedNoteContent ? "preview" : "split",
   );
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
   const [historyState, setHistoryState] = useState({
     canUndo: false,
     canRedo: false,
   });
-
-  useEffect(() => {
-    setDraft(selectedNote?.content ?? "");
-    setLastSavedAt(null);
-    setHistoryState({
-      canUndo: false,
-      canRedo: false,
-    });
-  }, [selectedNote?.id, selectedNote?.content]);
 
   const editorRef = useRef<MarkdownEditorHandle | null>(null);
   const preview = useMemo(
@@ -45,8 +58,6 @@ export default function Note() {
       : "note__mode-btn";
 
   const saveNote = async () => {
-    if (!selectedNote) return;
-
     await updateNoteContent(selectedNote.id, draft);
     setLastSavedAt(
       new Date().toLocaleTimeString([], {
@@ -55,8 +66,6 @@ export default function Note() {
       }),
     );
   };
-
-  if (!selectedNote) return null;
 
   return (
     <article className={`note note--${mode}`}>
