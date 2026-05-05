@@ -1,6 +1,9 @@
+
 # Nexora
 
 Nexora is a workspace-based note app for writing, organizing, and connecting ideas. It combines folders, Markdown files, internal links, and a visual graph so a workspace can grow from simple notes into a connected knowledge map.
+
+<img width="1899" height="909" alt="projects-page-with-graph" src="https://github.com/user-attachments/assets/72648122-1af9-4fe5-b344-a3941f51a9dd" />
 
 ## Features
 
